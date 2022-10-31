@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>upload images</title>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        .inputData{
+            position: relative;
+            top:10vh;
+            left:5vw;
+        }
+        #butn{
+            color: white;
+            background-color: green;
+            border-radius: .3rem;
+            padding: .3rem 1rem;
+            border:none;
+        }
+        #butn:active{
+            background-color: rgb(5, 175, 5);
+        }
+    </style>
+</head>
+<body>
+    <div class="inputData">
+    <input type="file" id="FILE">
+    <button id="butn">Uploads</button>
+    </div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.11/firebase-app.js";
+import { getStorage ,ref,uploadBytes ,getDownloadURL} from "https://www.gstatic.com/firebasejs/9.6.11/firebase-storage.js"
+const firebaseConfig = {
+    apiKey: "AIzaSyCaQoWNWGt2pFLj5ItFmFZXGpytb5cY8Tc",
+    authDomain: "imagelibary-a1b8b.firebaseapp.com",
+    projectId: "imagelibary-a1b8b",
+    storageBucket: "imagelibary-a1b8b.appspot.com",
+    messagingSenderId: "290315191555",
+    appId: "1:290315191555:web:332e64746c01007d599536"
+};
+const app = initializeApp(firebaseConfig);
+const storage = getStorage(app,"gs://imagelibary-a1b8b.appspot.com");
+const uploadImages = ()=>{
+    const myfile = document.getElementById("FILE").files[0];
+    const storageRef = ref(storage,"images/"+myfile.name)
+    uploadBytes(storageRef, myfile).then((snapshot) => {
+    console.log('successfully file uploaded',snapshot);
+    getDownloadURL(storageRef).then(url=>{
+        const data = {URL:url}
+        fetch("https://serverlessfunction.herokuapp.com/newImages", { method: "POST",headers: {'Content-Type': 'application/json'},body: JSON.stringify(data)})
+        .then(res => {alert("successfully image uploaded")});
+    })
+    }).catch(err=>console.log(err));
+}
+document.getElementById("butn").addEventListener("click",uploadImages);
+</script>  
+</body>
+</html>
